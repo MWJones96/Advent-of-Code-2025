@@ -5,8 +5,8 @@ fn part1() {
     let input = include_str!("input.txt").split(",");
     for range in input {
         let (start, end) = range.split_once("-").unwrap();
-        let mut start_u64 = 0;
-        let mut end_u64 = 0;
+        let start_u64;
+        let end_u64;
 
         if start.len() % 2 == 0 {
             let start_outer = &start[0..start.len() / 2];
@@ -81,7 +81,7 @@ fn part2() {
         let start = start.parse::<u64>().unwrap();
         let end = end.parse::<u64>().unwrap();
 
-        for digits in (start_digits..=end_digits) {
+        for digits in start_digits..=end_digits {
             if digits == 1 {
                 continue;
             }
