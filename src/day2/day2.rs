@@ -50,7 +50,7 @@ fn part1() {
         }
     }
 
-    println!("(Day 2) (Part 1) Sum of invalid IDs: {}", sum);
+    println!("(Part 1) Sum of invalid IDs: {}", sum);
 }
 
 fn part2() {
@@ -102,10 +102,12 @@ fn part2() {
         }
     }
 
-    println!("(Day 2) (Part 2) Sum of invalid IDs: {}", sum);
+    println!("(Part 2) Sum of invalid IDs: {}", sum);
 }
 
 pub fn day2() {
+    println!("---- DAY 2 ----");
     part1();
     part2();
+    println!();
 }

@@ -19,14 +19,16 @@ fn part1() {
         sum += max_line_jolts;
     }
 
-    println!("(Day 3) (Part 1) Total output joltage: {}", sum);
+    println!("(Part 1) Total output joltage: {}", sum);
 }
 
 fn part2() {
-    println!("(Day 3) (Part 2) {}", 0);
+    println!("(Part 2) Total output joltage: {}", 0);
 }
 
 pub fn day3() {
+    println!("---- DAY 3 ----");
     part1();
     part2();
+    println!("")
 }

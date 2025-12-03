@@ -21,7 +21,7 @@ fn part1() {
         }
     }
 
-    println!("(Day 1) (Part 1) Password: {}", password);
+    println!("(Part 1) Password: {}", password);
 }
 
 fn part2() {
@@ -52,10 +52,12 @@ fn part2() {
         }
     }
 
-    println!("(Day 1) (Part 2) Password: {}", password);
+    println!("(Part 2) Password: {}", password);
 }
 
 pub fn day1() {
+    println!("---- DAY 1 ----");
     part1();
     part2();
+    println!();
 }
