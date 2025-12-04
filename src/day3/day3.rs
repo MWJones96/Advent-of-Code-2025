@@ -1,4 +1,3 @@
-use core::num;
 use std::cmp::max;
 
 fn part1() {
@@ -16,7 +15,6 @@ fn part1() {
             let n = 10 * digits[j] + max_to_right[j];
             max_line_jolts = max(max_line_jolts, n);
         }
-
         sum += max_line_jolts;
     }
 
@@ -39,6 +37,7 @@ fn part2() {
         for r in 1..dp.len() {
             dp[r][1] = max(digits[r], dp[r - 1][1]);
         }
+
         for num_idx in 1..dp.len() {
             for bgt in 2..dp[0].len() {
                 let inc = 10 * dp[num_idx - 1][bgt - 1] + digits[num_idx];
@@ -47,7 +46,6 @@ fn part2() {
                 dp[num_idx][bgt] = max(inc, not_inc);
             }
         }
-
         sum += dp[dp.len() - 1][dp[0].len() - 1];
     }
     println!("(Part 2) Total output joltage: {}", sum);
