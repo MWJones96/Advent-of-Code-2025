@@ -45,8 +45,24 @@ fn part1() {
 
 fn part2() {
     let input = include_str!("input.txt");
-    let input = input.lines().collect::<Vec<&str>>();
-    println!("(Part 2) Rolls of paper removed: {}", 0);
+    let mut input = input
+        .lines()
+        .map(|line| line.chars().collect())
+        .collect::<Vec<Vec<char>>>();
+
+    let mut sum = 0;
+    loop {
+        let acc = _get_accessible_rolls(&input);
+        if acc.len() == 0 {
+            break;
+        }
+        sum += acc.len();
+        for (row, col) in acc {
+            input[row][col] = '.';
+        }
+    }
+
+    println!("(Part 2) Rolls of paper removed: {}", sum);
 }
 
 pub fn day4() {
