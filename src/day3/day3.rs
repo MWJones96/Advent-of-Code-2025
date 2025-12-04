@@ -1,3 +1,4 @@
+use core::num;
 use std::cmp::max;
 
 fn part1() {
@@ -23,7 +24,33 @@ fn part1() {
 }
 
 fn part2() {
-    println!("(Part 2) Total output joltage: {}", 0);
+    let input = include_str!("input.txt").split("\n");
+    let mut sum = 0;
+    for line in input {
+        let digits: Vec<u64> = line
+            .chars()
+            .map(|c| c.to_digit(10).unwrap() as u64)
+            .collect();
+        let mut dp: Vec<Vec<u64>> = vec![vec![0; 12 + 1]; digits.len()];
+
+        for c in 1..dp[0].len() {
+            dp[0][c] = digits[0] as u64;
+        }
+        for r in 1..dp.len() {
+            dp[r][1] = max(digits[r], dp[r - 1][1]);
+        }
+        for num_idx in 1..dp.len() {
+            for bgt in 2..dp[0].len() {
+                let inc = 10 * dp[num_idx - 1][bgt - 1] + digits[num_idx];
+                let not_inc = dp[num_idx - 1][bgt];
+
+                dp[num_idx][bgt] = max(inc, not_inc);
+            }
+        }
+
+        sum += dp[dp.len() - 1][dp[0].len() - 1];
+    }
+    println!("(Part 2) Total output joltage: {}", sum);
 }
 
 pub fn day3() {
