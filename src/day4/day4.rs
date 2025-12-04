@@ -1,13 +1,8 @@
-use std::arch::x86_64;
-
-fn part1() {
-    let input = include_str!("input.txt");
-    let input = input.lines().collect::<Vec<&str>>();
-    let mut sum = 0;
-
-    for row in 0..input.len() {
-        for col in 0..input[row].chars().count() {
-            let c = input[row].chars().nth(col).unwrap();
+fn _get_accessible_rolls(grid: &Vec<Vec<char>>) -> Vec<(usize, usize)> {
+    let mut acc = vec![];
+    for row in 0..grid.len() {
+        for col in 0..grid[row].len() {
+            let c = grid[row][col];
             if c == '@' {
                 let mut neighbour_count = 0;
                 for dx in -1..=1 {
@@ -18,32 +13,40 @@ fn part1() {
                         let x = col as isize + dx;
                         let y = row as isize + dy;
 
-                        if x < 0
-                            || y < 0
-                            || x >= input.len() as isize
-                            || y >= input[0].len() as isize
+                        if x < 0 || y < 0 || x >= grid.len() as isize || y >= grid[0].len() as isize
                         {
                             continue;
                         }
 
-                        if input[y as usize].chars().nth(x as usize).unwrap() == '@' {
+                        if grid[y as usize][x as usize] == '@' {
                             neighbour_count += 1;
                         }
                     }
                 }
                 if neighbour_count < 4 {
-                    sum += 1;
+                    acc.push((row, col));
                 }
             }
         }
     }
-    println!("(Part 1) Rolls of paper accessible: {}", sum);
+    acc
+}
+
+fn part1() {
+    let input = include_str!("input.txt");
+    let input = input
+        .lines()
+        .map(|line| line.chars().collect())
+        .collect::<Vec<Vec<char>>>();
+
+    let acc = _get_accessible_rolls(&input);
+    println!("(Part 1) Rolls of paper accessible: {}", acc.len());
 }
 
 fn part2() {
     let input = include_str!("input.txt");
     let input = input.lines().collect::<Vec<&str>>();
-    println!("(Part 2) not implemented yet");
+    println!("(Part 2) Rolls of paper removed: {}", 0);
 }
 
 pub fn day4() {
