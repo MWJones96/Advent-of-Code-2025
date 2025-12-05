@@ -70,9 +70,27 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    // TODO: implement Part 2
-    println!("(Part 2) not implemented yet");
+    let input = include_str!("input.txt");
+    let mut ranges: Vec<(u64, u64)> = vec![];
+    for line in input.lines() {
+        if line.len() == 0 {
+            break;
+        }
+
+        let (start, end) = line.split_once("-").unwrap();
+        let start = start.parse::<u64>().unwrap();
+        let end = end.parse::<u64>().unwrap();
+        ranges.push((start, end));
+    }
+
+    ranges.sort_by(|a, b| a.0.cmp(&b.0));
+    let ranges = _merge_ranges(&ranges);
+    let mut count = 0;
+    for range in ranges {
+        count += range.1 - range.0 + 1
+    }
+
+    println!("(Part 2) Fresh ingredient count: {}", count);
 }
 
 pub fn day5() {
