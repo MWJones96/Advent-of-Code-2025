@@ -10,7 +10,7 @@ fn part2() {
     println!("(Part 2) not implemented yet");
 }
 
-pub fn day7() {
+pub fn _day7() {
     println!("---- DAY 7 ----");
     part1();
     part2();

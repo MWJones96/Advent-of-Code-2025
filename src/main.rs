@@ -11,13 +11,14 @@ mod day7;
 mod day8;
 mod day9;
 
+#[allow(dead_code, unused_variables, unused_imports)]
 fn main() {
     day1::day1::day1();
     day2::day2::day2();
     day3::day3::day3();
     day4::day4::day4();
     day5::day5::day5();
-    //day6::day6::day6();
+    day6::day6::day6();
     //day7::day7::day7();
     //day8::day8::day8();
     //day9::day9::day9();
