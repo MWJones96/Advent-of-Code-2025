@@ -1,6 +1,3 @@
-use core::num;
-use std::ffi::c_char;
-
 fn part1() {
     let input = include_str!("input.txt");
     let input: Vec<&str> = input.split("\n").collect();
