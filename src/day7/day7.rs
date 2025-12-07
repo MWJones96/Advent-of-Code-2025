@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 fn part1() {
     let input = include_str!("input.txt");
@@ -37,8 +37,41 @@ fn part1() {
 }
 
 fn part2() {
-    let input = include_str!("test_input.txt");
-    println!("(Part 2) not implemented yet");
+    fn dfs(memo: &mut HashMap<(u64, u64), u64>, input: &Vec<Vec<char>>, row: u64, col: u64) -> u64 {
+        if row == input.len() as u64 {
+            return 1;
+        }
+
+        if memo.contains_key(&(row, col)) {
+            return *memo.get(&(row, col)).unwrap();
+        }
+
+        match input[row as usize][col as usize] {
+            'S' | '.' => {
+                let dfs = dfs(memo, input, row + 1, col);
+                memo.insert((row, col), dfs);
+                return dfs;
+            }
+            '^' => {
+                let dfs = dfs(memo, input, row, col - 1) + dfs(memo, input, row, col + 1);
+                memo.insert((row, col), dfs);
+                return dfs;
+            }
+            _ => {
+                panic!("Invalid character")
+            }
+        }
+    }
+
+    let input = include_str!("input.txt");
+    let input: Vec<&str> = input.split("\n").collect();
+    let input: Vec<Vec<char>> = input.iter().map(|c| c.chars().collect()).collect();
+    let start_col = input[0].iter().position(|c| *c == 'S').unwrap();
+
+    println!(
+        "(Part 2) Number of timelines: {}",
+        dfs(&mut HashMap::new(), &input, 0, start_col as u64)
+    );
 }
 
 pub fn day7() {
