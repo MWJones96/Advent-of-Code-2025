@@ -14,5 +14,4 @@ pub fn day12() {
     println!("---- DAY 12 ----");
     part1();
     part2();
-    println!("");
 }

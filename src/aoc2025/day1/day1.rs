@@ -1,10 +1,8 @@
-use std::fs::read_to_string;
-
 fn part1() {
     let mut state: i32 = 50;
     let mut password: u32 = 0;
 
-    for line in read_to_string("src/day1/input.txt").unwrap().lines() {
+    for line in include_str!("input.txt").lines() {
         let (side, num) = line.split_at(1);
         let num: i32 = num.parse::<i32>().ok().expect("Expected a number");
         match side {
@@ -28,7 +26,7 @@ fn part2() {
     let mut state: i32 = 50;
     let mut password: u32 = 0;
 
-    for line in read_to_string("src/day1/input.txt").unwrap().lines() {
+    for line in include_str!("input.txt").lines() {
         let (side, num) = line.split_at(1);
         let num: u32 = num.parse::<u32>().ok().expect("Expected a number");
         match side {
