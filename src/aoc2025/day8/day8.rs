@@ -1,5 +1,5 @@
 use std::cmp::{Reverse, min};
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
 
 use ordered_float::OrderedFloat;
 
@@ -27,10 +27,13 @@ fn find(parents: &Vec<usize>, x: usize) -> usize {
     x
 }
 
-fn union(parents: &mut Vec<usize>, x: usize, y: usize) {
+fn union(parents: &mut Vec<usize>, x: usize, y: usize) -> bool {
     let parent_y = find(parents, y);
     let parent_x = find(parents, x);
     parents[parent_y] = parent_x;
+
+    // return true -> we need to make a new connection
+    parent_y != parent_x
 }
 
 fn part1() {
@@ -78,9 +81,41 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    // TODO: implement Part 2
-    println!("(Part 2) not implemented yet");
+    let input = include_str!("input.txt").split("\n").collect::<Vec<&str>>();
+    let input: Vec<Vec<u64>> = input
+        .iter()
+        .map(|s| (*s).split(",").map(|s2| s2.parse().unwrap()).collect())
+        .collect();
+    let mut junction_boxes = vec![];
+    let mut heap = BinaryHeap::new();
+    let mut parents = vec![];
+    for xyz in input {
+        let junction_box = JunctionBox {
+            x: xyz[0],
+            y: xyz[1],
+            z: xyz[2],
+        };
+        junction_boxes.push(junction_box);
+    }
+    for i in 0..junction_boxes.len() {
+        parents.push(i);
+        for j in (i + 1)..junction_boxes.len() {
+            let dist = junction_boxes[i].dist(&junction_boxes[j]);
+            heap.push((Reverse(OrderedFloat(dist)), i, j));
+        }
+    }
+    let (mut x1, mut x2) = (0, 0);
+    for _ in 0..heap.len() {
+        let (_, i, j) = heap.pop().unwrap();
+        if union(&mut parents, i, j) {
+            x1 = junction_boxes[i].x;
+            x2 = junction_boxes[j].x
+        }
+    }
+    println!(
+        "(Part 2) Product of X co-ords of last two junction boxes: {}",
+        x1 * x2
+    );
 }
 
 pub fn day8() {
