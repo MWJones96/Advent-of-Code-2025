@@ -9,3 +9,4 @@ sound = []
 
 [dependencies]
 ordered-float = "5.1.0"
+regex = "1.12.2"
