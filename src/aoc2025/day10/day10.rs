@@ -1,19 +1,20 @@
-use std::collections::{HashSet, VecDeque};
+use once_cell::sync::Lazy;
+use std::collections::{HashMap, HashSet, VecDeque};
+use z3::Solver;
+use z3::ast::Int;
 
 use regex::Regex;
+static RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^(\[[^\]]+\])\s+((?:\([^)]+\)\s*)+)\s+(\{[^}]+\})$").unwrap());
 
 fn part1() {
     let input = include_str!("input.txt");
-    let re = Regex::new(r"^(\[[^\]]+\])\s+((?:\([^)]+\)\s*)+)\s+(\{[^}]+\})$").unwrap();
     let mut sum = 0;
 
     for line in input.split("\n") {
-        let line = re.captures(line).unwrap();
+        let line = RE.captures(line).unwrap();
         let target_state: &str = &line[1][1..line[1].len() - 1];
-        let target_state: Vec<bool> = target_state
-            .chars()
-            .map(|c| if c == '#' { true } else { false })
-            .collect();
+        let target_state: Vec<bool> = target_state.chars().map(|c| c == '#').collect();
 
         let moves: &str = &line[2];
         let moves: Vec<&str> = moves.split(" ").collect();
@@ -59,9 +60,79 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    // TODO: implement Part 2
-    println!("(Part 2) not implemented yet");
+    let input = include_str!("input.txt");
+    let mut sum: u64 = 0;
+    for line in input.lines() {
+        let line = RE.captures(line).unwrap();
+
+        let moves: &str = &line[2];
+        let moves: Vec<&str> = moves.split(" ").collect();
+        let moves: Vec<Vec<usize>> = moves
+            .iter()
+            .map(|s| {
+                s.trim_matches(&['(', ')'][..])
+                    .split(',')
+                    .map(|x| x.parse::<usize>().unwrap())
+                    .collect()
+            })
+            .collect();
+
+        let target_joltage: &str = &line[3];
+        let target_joltage: &str = &target_joltage[1..target_joltage.len() - 1];
+        let target_joltage: Vec<u32> = target_joltage
+            .split(",")
+            .map(|n| n.parse().unwrap())
+            .collect();
+
+        let mut count: HashMap<usize, Vec<usize>> = HashMap::new();
+        for i in 0..moves.len() {
+            for num in &moves[i] {
+                let v = count.entry(*num).or_insert(vec![]);
+                v.push(i);
+            }
+        }
+
+        let mut count: Vec<_> = count.iter().collect();
+        count.sort_by_key(|(k, _)| *k);
+        let count: Vec<_> = count.iter().map(|(_, v)| *v).collect();
+
+        let solver = Solver::new();
+        let mut x: Vec<Int> = vec![];
+        for _ in 0..moves.len() {
+            let xi = Int::fresh_const("x");
+            solver.assert(xi.ge(0));
+            x.push(xi);
+        }
+
+        let z: Vec<_> = count.into_iter().zip(target_joltage).collect();
+        for (buttons, target) in z {
+            let cv: Vec<_> = buttons.iter().map(|c| &x[*c]).collect();
+            let cv2 = Int::add(&cv);
+            solver.assert(cv2.eq(target));
+        }
+
+        let solutions: Vec<_> = solver
+            .solutions(x, false)
+            // we use take to ensure that this loop terminates in case there are very many solutions
+            .take(2000)
+            .collect();
+
+        let solutions: Vec<u64> = solutions
+            .iter()
+            .map(|solution| {
+                solution
+                    .iter()
+                    .map(|v| {
+                        // Evaluate each variable to get its value as i64
+                        v.as_i64().unwrap() as u64
+                    })
+                    .sum()
+            })
+            .collect();
+
+        sum += solutions.iter().min().unwrap();
+    }
+    println!("(Part 2) Fewest button presses: {}", sum);
 }
 
 pub fn day10() {
