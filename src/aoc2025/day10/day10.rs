@@ -98,9 +98,12 @@ fn part2() {
 
         let solver = Solver::new();
         let mut x: Vec<Int> = vec![];
-        for _ in 0..moves.len() {
+        for i in 0..moves.len() {
             let xi = Int::fresh_const("x");
             solver.assert(xi.ge(0));
+            let v: Vec<_> = moves[i].iter().map(|mv| target_joltage[*mv]).collect();
+            let vm = *v.iter().min().unwrap();
+            solver.assert(xi.le(vm));
             x.push(xi);
         }
 
@@ -112,22 +115,14 @@ fn part2() {
         }
 
         let solutions: Vec<_> = solver
-            .solutions(x, false)
+            .solutions(x, true)
             // we use take to ensure that this loop terminates in case there are very many solutions
             .take(2000)
             .collect();
 
         let solutions: Vec<u64> = solutions
             .iter()
-            .map(|solution| {
-                solution
-                    .iter()
-                    .map(|v| {
-                        // Evaluate each variable to get its value as i64
-                        v.as_i64().unwrap() as u64
-                    })
-                    .sum()
-            })
+            .map(|solution| solution.iter().map(|v| v.as_i64().unwrap() as u64).sum())
             .collect();
 
         sum += solutions.iter().min().unwrap();
