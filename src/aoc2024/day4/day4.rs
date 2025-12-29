@@ -52,8 +52,32 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    println!("(2024 Day 4) Part 2 not implemented yet");
+    let input = include_str!("input.txt");
+    let mut grid: Vec<Vec<char>> = vec![];
+    let mut sum = 0;
+    for line in input.lines() {
+        grid.push(line.chars().collect::<Vec<char>>());
+    }
+    for row in 0..grid.len() - 2 {
+        for col in 0..grid.len() - 2 {
+            let word1 = format!(
+                "{}{}{}",
+                grid[row][col],
+                grid[row + 1][col + 1],
+                grid[row + 2][col + 2]
+            );
+            let word2 = format!(
+                "{}{}{}",
+                grid[row][col + 2],
+                grid[row + 1][col + 1],
+                grid[row + 2][col]
+            );
+            if (word1 == "MAS" || word1 == "SAM") && (word2 == "MAS" || word2 == "SAM") {
+                sum += 1;
+            }
+        }
+    }
+    println!("(Part 2) Appearances of 'X-MAS' in wordsearch: {}", sum);
 }
 
 pub fn day4() {
