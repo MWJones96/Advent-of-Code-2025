@@ -70,8 +70,47 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    println!("(2024 Day 8) Part 2 not implemented yet");
+    let input = include_str!("input.txt");
+    let re = Regex::new(r"[0-9a-zA-Z]").unwrap();
+    let mut nodes: HashMap<char, Vec<(u8, u8)>> = HashMap::new();
+    let mut antinodes: HashSet<(u8, u8)> = HashSet::new();
+
+    let row_count = input.lines().collect::<Vec<_>>().len() as i32;
+    let col_count = input.lines().collect::<Vec<_>>()[0].len() as i32;
+
+    for (row, line) in input.lines().enumerate() {
+        for (col, c) in line.chars().enumerate() {
+            if re.is_match(&c.to_string()) {
+                nodes
+                    .entry(c)
+                    .or_insert_with(Vec::new)
+                    .push((row as u8, col as u8));
+            }
+        }
+    }
+    for key in nodes.keys() {
+        let vals = nodes.get(key).unwrap();
+        for i in 0..vals.len() {
+            for j in (i + 1)..vals.len() {
+                let (row_i, col_i) = vals[i];
+                let (row_j, col_j) = vals[j];
+
+                let vector = (row_i as i32 - row_j as i32, col_i as i32 - col_j as i32);
+                let mut pos = (row_i as i32, col_i as i32);
+
+                while pos.0 >= 0 && pos.0 < row_count && pos.1 >= 0 && pos.1 < col_count {
+                    antinodes.insert((pos.0 as u8, pos.1 as u8));
+                    pos = (pos.0 + vector.0, pos.1 + vector.1);
+                }
+                pos = (row_i as i32, col_i as i32);
+                while pos.0 >= 0 && pos.0 < row_count && pos.1 >= 0 && pos.1 < col_count {
+                    antinodes.insert((pos.0 as u8, pos.1 as u8));
+                    pos = (pos.0 - vector.0, pos.1 - vector.1);
+                }
+            }
+        }
+    }
+    println!("(Part 2) Unique antinode locations: {}", antinodes.len());
 }
 
 pub fn day8() {
