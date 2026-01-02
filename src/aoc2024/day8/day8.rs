@@ -114,7 +114,7 @@ fn part2() {
 }
 
 pub fn day8() {
-    println!("---- 2024 DAY 8 ----");
+    println!("---- DAY 8 ----");
     part1();
     part2();
     println!("");
