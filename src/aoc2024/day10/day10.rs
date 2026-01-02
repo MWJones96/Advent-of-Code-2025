@@ -88,7 +88,7 @@ fn part2() {
             sum += dfs2(&grid, row.0 as i8, col.0 as i8, 0);
         }
     }
-    println!("(Part 1) Sum of trailhead ratings: {}", sum);
+    println!("(Part 2) Sum of trailhead ratings: {}", sum);
 }
 
 pub fn day10() {
