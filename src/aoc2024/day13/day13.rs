@@ -1,3 +1,5 @@
+use std::u64;
+
 use z3::Solver;
 use z3::ast::Int;
 
@@ -42,7 +44,7 @@ fn part1() {
         let b_presses = Int::fresh_const("b");
 
         let solver = Solver::new();
-        let mut min: u64 = 401;
+        let mut min: u64 = u64::MAX;
 
         solver.assert(a_presses.ge(0));
         solver.assert(b_presses.ge(0));
@@ -55,21 +57,20 @@ fn part1() {
             .solutions([&a_presses, &b_presses], false)
             .take(1)
             .collect();
-        while solution.len() >= 1 {
-            let ab = solution[0].clone();
-            let a = ab[0].as_u64().unwrap();
-            let b = ab[1].as_u64().unwrap();
+        if solution.len() > 0 {
+            while solution.len() >= 1 {
+                let ab = solution[0].clone();
+                let a = ab[0].as_u64().unwrap();
+                let b = ab[1].as_u64().unwrap();
 
-            min = min.min(3 * a + b);
-            solver.assert((Int::from(3) * &a_presses + &b_presses).lt(min));
+                min = min.min(3 * a + b);
+                solver.assert((Int::from(3) * &a_presses + &b_presses).lt(min));
 
-            solution = solver
-                .solutions([&a_presses, &b_presses], false)
-                .take(1)
-                .collect();
-        }
-
-        if min < 401 {
+                solution = solver
+                    .solutions([&a_presses, &b_presses], false)
+                    .take(1)
+                    .collect();
+            }
             tokens += min;
         }
     }
@@ -97,7 +98,7 @@ fn part2() {
         let b_presses = Int::fresh_const("b");
 
         let solver = Solver::new();
-        let mut min: u64 = 200000000000000;
+        let mut min: u64 = u64::MAX;
 
         solver.assert(a_presses.ge(0));
         solver.assert(b_presses.ge(0));
