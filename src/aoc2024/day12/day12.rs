@@ -1,5 +1,11 @@
 use std::collections::HashSet;
 
+#[derive(Hash, PartialEq, Eq)]
+enum Dir {
+    Horizontal((i16, i16), i16),
+    Vertical(i16, (i16, i16)),
+}
+
 fn dfs(
     grid: &mut Vec<Vec<char>>,
     seen: &mut HashSet<(u8, u8)>,
@@ -7,7 +13,7 @@ fn dfs(
     col: i16,
     curr: char,
     area: &mut u64,
-    perimeter: &mut u64,
+    perimeter: &mut HashSet<Dir>,
 ) {
     if row < 0 || row >= grid.len() as i16 {
         return;
@@ -23,16 +29,16 @@ fn dfs(
     }
 
     if row == 0 || grid[(row - 1) as usize][col as usize] != curr {
-        *perimeter += 1;
+        perimeter.insert(Dir::Horizontal((row - 1, row), col));
     }
     if row == grid.len() as i16 - 1 || grid[(row + 1) as usize][col as usize] != curr {
-        *perimeter += 1;
+        perimeter.insert(Dir::Horizontal((row, row + 1), col));
     }
     if col == 0 || grid[row as usize][(col - 1) as usize] != curr {
-        *perimeter += 1;
+        perimeter.insert(Dir::Vertical(row, (col - 1, col)));
     }
     if col == grid[0].len() as i16 - 1 || grid[row as usize][(col + 1) as usize] != curr {
-        *perimeter += 1;
+        perimeter.insert(Dir::Vertical(row, (col, col + 1)));
     }
     *area += 1;
 
@@ -56,7 +62,7 @@ fn part1() {
         for col in 0..grid[0].len() {
             let ch = grid[row][col];
             let mut area = 0;
-            let mut perimeter = 0;
+            let mut perimeter: HashSet<Dir> = HashSet::new();
             dfs(
                 &mut grid,
                 &mut seen,
@@ -67,7 +73,7 @@ fn part1() {
                 &mut perimeter,
             );
 
-            price += area * perimeter;
+            price += area * perimeter.len() as u64;
         }
     }
     println!("(Part 1) Total price of fencing: {}", price);
