@@ -1,5 +1,26 @@
 use std::collections::HashMap;
 
+struct Robot {
+    row: i16,
+    col: i16,
+
+    d_row: i16,
+    d_col: i16,
+}
+
+fn contains_no_robot_overlap(width: i16, height: i16, robots: &Vec<Robot>) -> bool {
+    let mut grid: Vec<Vec<_>> = vec![vec!['.'; width as usize]; height as usize];
+
+    for r in robots {
+        if grid[r.row as usize][r.col as usize] == '*' {
+            return false;
+        }
+        grid[r.row as usize][r.col as usize] = '*';
+    }
+
+    return true;
+}
+
 fn part1() {
     let input = include_str!("input.txt");
     let mut width = 0;
@@ -72,12 +93,52 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    println!("(2024 Day 14) Part 2 not implemented yet");
+    let input = include_str!("input.txt");
+    let mut width = 0;
+    let mut height = 0;
+
+    let mut robots: Vec<Robot> = vec![];
+    for line in input.lines() {
+        let robot = line.split_once(" ").unwrap();
+        let pos = robot.0.split("=").collect::<Vec<_>>()[1];
+        let pos: Vec<_> = pos.split(",").map(|c| c.parse::<i16>().unwrap()).collect();
+        let (col, row) = (pos[0], pos[1]);
+
+        let v = robot.1.split("=").collect::<Vec<_>>()[1];
+        let v: Vec<_> = v.split(",").map(|c| c.parse::<i16>().unwrap()).collect();
+        let (d_col, d_row) = (v[0], v[1]);
+
+        robots.push(Robot {
+            row,
+            col,
+            d_row,
+            d_col,
+        });
+
+        height = height.max(row + 1);
+        width = width.max(col + 1);
+    }
+
+    let mut seconds = 0;
+
+    while !contains_no_robot_overlap(width, height, &robots) {
+        for r in &mut robots {
+            r.row += r.d_row;
+            r.row = r.row.rem_euclid(height);
+
+            r.col += r.d_col;
+            r.col = r.col.rem_euclid(width);
+        }
+        seconds += 1;
+    }
+    println!(
+        "(Part 2): Minimum seconds elapsed for Easter Egg: {}",
+        seconds
+    );
 }
 
 pub fn day14() {
-    println!("---- 2024 DAY 14 ----");
+    println!("---- DAY 14 ----");
     part1();
     part2();
     println!("");
