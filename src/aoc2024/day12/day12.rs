@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Copy, Clone)]
 enum Dir {
     Horizontal((i16, i16), i16),
     Vertical(i16, (i16, i16)),
@@ -29,13 +29,13 @@ fn dfs(
     }
 
     if row == 0 || grid[(row - 1) as usize][col as usize] != curr {
-        perimeter.insert(Dir::Horizontal((row - 1, row), col));
+        perimeter.insert(Dir::Horizontal((row, row - 1), col));
     }
     if row == grid.len() as i16 - 1 || grid[(row + 1) as usize][col as usize] != curr {
         perimeter.insert(Dir::Horizontal((row, row + 1), col));
     }
     if col == 0 || grid[row as usize][(col - 1) as usize] != curr {
-        perimeter.insert(Dir::Vertical(row, (col - 1, col)));
+        perimeter.insert(Dir::Vertical(row, (col, col - 1)));
     }
     if col == grid[0].len() as i16 - 1 || grid[row as usize][(col + 1) as usize] != curr {
         perimeter.insert(Dir::Vertical(row, (col, col + 1)));
@@ -80,8 +80,66 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    println!("(Part 2) Part 2 not implemented yet");
+    let input = include_str!("input.txt");
+    let mut grid: Vec<Vec<char>> = vec![];
+    let mut seen: HashSet<(u8, u8)> = HashSet::new();
+    let mut price: u64 = 0;
+    for line in input.lines() {
+        grid.push(line.chars().collect::<Vec<char>>());
+    }
+
+    for row in 0..grid.len() {
+        for col in 0..grid[0].len() {
+            let ch = grid[row][col];
+            let mut area = 0;
+            let mut perimeter: HashSet<Dir> = HashSet::new();
+            dfs(
+                &mut grid,
+                &mut seen,
+                row as i16,
+                col as i16,
+                ch,
+                &mut area,
+                &mut perimeter,
+            );
+
+            let mut sides: u64 = 0;
+            while !perimeter.is_empty() {
+                let element = perimeter.iter().next().copied().unwrap();
+                perimeter.remove(&element);
+
+                let mut prev = match element {
+                    Dir::Horizontal((row1, row2), col) => Dir::Horizontal((row1, row2), col - 1),
+                    Dir::Vertical(row, (col1, col2)) => Dir::Vertical(row - 1, (col1, col2)),
+                };
+                while perimeter.contains(&prev) {
+                    perimeter.remove(&prev);
+                    prev = match prev {
+                        Dir::Horizontal((row1, row2), col) => {
+                            Dir::Horizontal((row1, row2), col - 1)
+                        }
+                        Dir::Vertical(row, (col1, col2)) => Dir::Vertical(row - 1, (col1, col2)),
+                    };
+                }
+                let mut next = match element {
+                    Dir::Horizontal((row1, row2), col) => Dir::Horizontal((row1, row2), col + 1),
+                    Dir::Vertical(row, (col1, col2)) => Dir::Vertical(row + 1, (col1, col2)),
+                };
+                while perimeter.contains(&next) {
+                    perimeter.remove(&next);
+                    next = match next {
+                        Dir::Horizontal((row1, row2), col) => {
+                            Dir::Horizontal((row1, row2), col + 1)
+                        }
+                        Dir::Vertical(row, (col1, col2)) => Dir::Vertical(row + 1, (col1, col2)),
+                    };
+                }
+                sides += 1;
+            }
+            price += area * sides;
+        }
+    }
+    println!("(Part 2) Total price of fencing: {}", price);
 }
 
 pub fn day12() {
