@@ -59,7 +59,7 @@ fn part2() {
         }
     }
 
-    println!("(Part 1) Total calibration result: {}", sum);
+    println!("(Part 2) Total calibration result: {}", sum);
 }
 
 pub fn day7() {
