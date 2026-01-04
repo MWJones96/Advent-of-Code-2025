@@ -131,6 +131,17 @@ fn part2() {
         }
         seconds += 1;
     }
+
+    let mut grid: Vec<Vec<_>> = vec![vec!['.'; width as usize]; height as usize];
+
+    for r in robots {
+        grid[r.row as usize][r.col as usize] = '*';
+    }
+
+    for row in grid {
+        println!("{}", row.iter().collect::<String>());
+    }
+
     println!(
         "(Part 2): Minimum seconds elapsed for Easter Egg: {}",
         seconds
