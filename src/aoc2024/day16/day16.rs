@@ -19,12 +19,12 @@ impl Direction {
         }
     }
 
-    fn get_next(&self) -> (Direction, Direction) {
+    fn get_next(&self) -> [Direction; 2] {
         match self {
-            Direction::North => (Direction::East, Direction::West),
-            Direction::South => (Direction::East, Direction::West),
-            Direction::West => (Direction::North, Direction::South),
-            Direction::East => (Direction::North, Direction::South),
+            Direction::North => [Direction::East, Direction::West],
+            Direction::South => [Direction::East, Direction::West],
+            Direction::West => [Direction::North, Direction::South],
+            Direction::East => [Direction::North, Direction::South],
         }
     }
 }
@@ -44,15 +44,13 @@ fn part1() {
         if grid[row][col] == 'E' {
             return curr_score;
         }
-
-        if curr_score < *seen.entry((row, col)).or_insert(u64::MAX) {
-            *seen.entry((row, col)).or_insert(curr_score) = curr_score;
-        } else {
+        if curr_score >= *seen.entry((row, col)).or_insert(u64::MAX) {
             return u64::MAX;
         }
 
-        let sides = dir.get_next();
-        let sides = [sides.0, sides.1].map(|d| (d.get_vector(row, col), d));
+        *seen.get_mut(&(row, col)).unwrap() = curr_score;
+
+        let sides = dir.get_next().map(|d| (d.get_vector(row, col), d));
 
         let (f_row, f_col) = dir.get_vector(row, col);
         let mut min = dfs(seen, grid, f_row, f_col, dir, curr_score + 1);
@@ -99,7 +97,7 @@ fn part1() {
 
 fn part2() {
     let _input = include_str!("input.txt");
-    println!("(2024 Day 16) Part 2 not implemented yet");
+    println!("(Part 2) Part 2 not implemented yet");
 }
 
 pub fn day16() {
