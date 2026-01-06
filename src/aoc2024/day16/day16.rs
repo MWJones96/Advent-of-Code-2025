@@ -1,4 +1,5 @@
-use std::collections::VecDeque;
+use std::collections::HashMap;
+use std::u64;
 
 #[derive(Debug, Clone, Copy)]
 enum Direction {
@@ -9,12 +10,12 @@ enum Direction {
 }
 
 impl Direction {
-    fn get_vector(&self) -> (isize, isize) {
+    fn get_vector(&self, row: usize, col: usize) -> (usize, usize) {
         match self {
-            Direction::North => (-1, 0),
-            Direction::South => (1, 0),
-            Direction::West => (0, -1),
-            Direction::East => (0, 1),
+            Direction::North => (row - 1, col),
+            Direction::South => (row + 1, col),
+            Direction::West => (row, col - 1),
+            Direction::East => (row, col + 1),
         }
     }
 
@@ -29,6 +30,46 @@ impl Direction {
 }
 
 fn part1() {
+    fn dfs(
+        seen: &mut HashMap<(usize, usize), u64>,
+        grid: &Vec<Vec<char>>,
+        row: usize,
+        col: usize,
+        dir: Direction,
+        curr_score: u64,
+    ) -> u64 {
+        if grid[row][col] == '#' {
+            return u64::MAX;
+        }
+        if grid[row][col] == 'E' {
+            return curr_score;
+        }
+
+        if curr_score < *seen.entry((row, col)).or_insert(u64::MAX) {
+            *seen.entry((row, col)).or_insert(curr_score) = curr_score;
+        } else {
+            return u64::MAX;
+        }
+
+        let sides = dir.get_next();
+        let sides = [sides.0, sides.1].map(|d| (d.get_vector(row, col), d));
+
+        let (f_row, f_col) = dir.get_vector(row, col);
+        let mut min = dfs(seen, grid, f_row, f_col, dir, curr_score + 1);
+        for (turn_coords, turn_dir) in sides {
+            min = min.min(dfs(
+                seen,
+                grid,
+                turn_coords.0,
+                turn_coords.1,
+                turn_dir,
+                curr_score + 1001,
+            ));
+        }
+
+        min
+    }
+
     let input = include_str!("input.txt");
     let mut grid: Vec<Vec<char>> = vec![];
     let mut start_idx = (0, 0);
@@ -43,61 +84,17 @@ fn part1() {
         grid.push(grid_line);
     }
 
-    let mut end_score = 0;
-    let mut frontier: VecDeque<(usize, usize, Direction, u64)> = VecDeque::new();
-    frontier.push_back((start_idx.0, start_idx.1, Direction::East, 0));
-    'outer: while !frontier.is_empty() {
-        let frontier_len = frontier.len();
-        for _ in 0..frontier_len {
-            let (row, col, dir, score) = frontier.pop_front().unwrap();
-            let mut next_idx = (row, col);
-            let mut steps = 0;
-            while grid[next_idx.0][next_idx.1] != '#' {
-                if grid[next_idx.0][next_idx.1] == 'E' {
-                    end_score = score + steps;
-                    break 'outer;
-                }
-                if grid[next_idx.0][next_idx.1] == '*' {
-                    break;
-                }
-                grid[next_idx.0][next_idx.1] = '*';
-
-                let sides = dir.get_next();
-                let sides = [sides.0, sides.1].map(|d| (d.get_vector(), d));
-                let sides = [
-                    (
-                        (
-                            (next_idx.0 as isize + sides[0].0.0) as usize,
-                            (next_idx.1 as isize + sides[0].0.1) as usize,
-                        ),
-                        sides[0].1,
-                    ),
-                    (
-                        (
-                            (next_idx.0 as isize + sides[1].0.0) as usize,
-                            (next_idx.1 as isize + sides[1].0.1) as usize,
-                        ),
-                        sides[1].1,
-                    ),
-                ];
-
-                for (idx, dir) in sides {
-                    if grid[idx.0][idx.1] == '.' {
-                        frontier.push_back((idx.0, idx.1, dir, score + 1000 + steps + 1));
-                    }
-                }
-
-                let next_dir = dir.get_vector();
-                next_idx = (
-                    (next_idx.0 as isize + next_dir.0) as usize,
-                    (next_idx.1 as isize + next_dir.1) as usize,
-                );
-                steps += 1;
-            }
-        }
-    }
-
-    println!("(Part 1) Shortest path to end: {}", end_score);
+    println!(
+        "(Part 1) Shortest path to end: {}",
+        dfs(
+            &mut HashMap::new(),
+            &grid,
+            start_idx.0,
+            start_idx.1,
+            Direction::East,
+            0
+        )
+    );
 }
 
 fn part2() {
