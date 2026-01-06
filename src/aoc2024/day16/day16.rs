@@ -10,7 +10,7 @@ enum Direction {
 }
 
 impl Direction {
-    fn get_vector(&self, row: usize, col: usize) -> (usize, usize) {
+    fn get_next_step_forward(&self, row: usize, col: usize) -> (usize, usize) {
         match self {
             Direction::North => (row - 1, col),
             Direction::South => (row + 1, col),
@@ -19,12 +19,48 @@ impl Direction {
         }
     }
 
-    fn get_next(&self) -> [Direction; 2] {
+    fn get_turn_directions(&self, row: usize, col: usize) -> [((usize, usize), Direction); 2] {
         match self {
-            Direction::North => [Direction::East, Direction::West],
-            Direction::South => [Direction::East, Direction::West],
-            Direction::West => [Direction::North, Direction::South],
-            Direction::East => [Direction::North, Direction::South],
+            Direction::North => [
+                (
+                    Direction::East.get_next_step_forward(row, col),
+                    Direction::East,
+                ),
+                (
+                    Direction::West.get_next_step_forward(row, col),
+                    Direction::West,
+                ),
+            ],
+            Direction::South => [
+                (
+                    Direction::East.get_next_step_forward(row, col),
+                    Direction::East,
+                ),
+                (
+                    Direction::West.get_next_step_forward(row, col),
+                    Direction::West,
+                ),
+            ],
+            Direction::West => [
+                (
+                    Direction::North.get_next_step_forward(row, col),
+                    Direction::North,
+                ),
+                (
+                    Direction::South.get_next_step_forward(row, col),
+                    Direction::South,
+                ),
+            ],
+            Direction::East => [
+                (
+                    Direction::North.get_next_step_forward(row, col),
+                    Direction::North,
+                ),
+                (
+                    Direction::South.get_next_step_forward(row, col),
+                    Direction::South,
+                ),
+            ],
         }
     }
 }
@@ -50,11 +86,11 @@ fn part1() {
 
         *seen.get_mut(&(row, col)).unwrap() = curr_score;
 
-        let sides = dir.get_next().map(|d| (d.get_vector(row, col), d));
+        let turns: [((usize, usize), Direction); 2] = dir.get_turn_directions(row, col);
 
-        let (f_row, f_col) = dir.get_vector(row, col);
+        let (f_row, f_col) = dir.get_next_step_forward(row, col);
         let mut min = dfs(seen, grid, f_row, f_col, dir, curr_score + 1);
-        for (turn_coords, turn_dir) in sides {
+        for (turn_coords, turn_dir) in turns {
             min = min.min(dfs(
                 seen,
                 grid,
