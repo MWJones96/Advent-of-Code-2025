@@ -1,7 +1,7 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::u64;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum Direction {
     North,
     South,
@@ -65,45 +65,122 @@ impl Direction {
     }
 }
 
-fn part1() {
-    fn dfs(
-        seen: &mut HashMap<(usize, usize), u64>,
-        grid: &Vec<Vec<char>>,
-        row: usize,
-        col: usize,
-        dir: Direction,
-        curr_score: u64,
-    ) -> u64 {
-        if grid[row][col] == '#' {
+fn dfs(
+    seen: &mut HashMap<(usize, usize, Direction), u64>,
+    grid: &Vec<Vec<char>>,
+    row: usize,
+    col: usize,
+    dir: Direction,
+    curr_score: u64,
+    best_so_far: &mut u64,
+) -> u64 {
+    if curr_score > *best_so_far {
+        return u64::MAX;
+    }
+    if grid[row][col] == '#' {
+        return u64::MAX;
+    }
+    if grid[row][col] == 'E' {
+        *best_so_far = curr_score.min(*best_so_far);
+        return curr_score;
+    }
+    if seen.contains_key(&(row, col, dir)) {
+        let v = seen.get(&(row, col, dir)).unwrap();
+        if curr_score > *v {
             return u64::MAX;
         }
-        if grid[row][col] == 'E' {
-            return curr_score;
-        }
-        if curr_score >= *seen.entry((row, col)).or_insert(u64::MAX) {
-            return u64::MAX;
-        }
-
-        *seen.get_mut(&(row, col)).unwrap() = curr_score;
-
-        let turns: [((usize, usize), Direction); 2] = dir.get_turn_directions(row, col);
-
-        let (f_row, f_col) = dir.get_next_step_forward(row, col);
-        let mut min = dfs(seen, grid, f_row, f_col, dir, curr_score + 1);
-        for (turn_coords, turn_dir) in turns {
-            min = min.min(dfs(
-                seen,
-                grid,
-                turn_coords.0,
-                turn_coords.1,
-                turn_dir,
-                curr_score + 1001,
-            ));
-        }
-
-        min
+        seen.insert((row, col, dir), curr_score.min(*v));
+    } else {
+        seen.insert((row, col, dir), curr_score);
     }
 
+    let turns: [((usize, usize), Direction); 2] = dir.get_turn_directions(row, col);
+
+    let (f_row, f_col) = dir.get_next_step_forward(row, col);
+    let mut min = dfs(seen, grid, f_row, f_col, dir, curr_score + 1, best_so_far);
+    for (turn_coords, turn_dir) in turns {
+        min = min.min(dfs(
+            seen,
+            grid,
+            turn_coords.0,
+            turn_coords.1,
+            turn_dir,
+            curr_score + 1001,
+            best_so_far,
+        ));
+    }
+
+    min
+}
+
+fn dfs2(
+    seen: &mut HashMap<(usize, usize, Direction), u64>,
+    grid: &Vec<Vec<char>>,
+    row: usize,
+    col: usize,
+    dir: Direction,
+    curr_score: u64,
+    best_score: u64,
+    best_so_far: &mut u64,
+    best_tiles: &mut HashSet<(usize, usize)>,
+) -> u64 {
+    if curr_score > *best_so_far {
+        return u64::MAX;
+    }
+    if grid[row][col] == '#' {
+        return u64::MAX;
+    }
+    if grid[row][col] == 'E' {
+        *best_so_far = curr_score.min(*best_so_far);
+        best_tiles.insert((row, col));
+        return curr_score;
+    }
+    if seen.contains_key(&(row, col, dir)) {
+        let v = seen.get(&(row, col, dir)).unwrap();
+        if curr_score > *v {
+            return u64::MAX;
+        }
+        seen.insert((row, col, dir), curr_score.min(*v));
+    } else {
+        seen.insert((row, col, dir), curr_score);
+    }
+
+    let turns: [((usize, usize), Direction); 2] = dir.get_turn_directions(row, col);
+
+    let (f_row, f_col) = dir.get_next_step_forward(row, col);
+    let mut min = dfs2(
+        seen,
+        grid,
+        f_row,
+        f_col,
+        dir,
+        curr_score + 1,
+        best_score,
+        best_so_far,
+        best_tiles,
+    );
+    for (turn_coords, turn_dir) in turns {
+        min = min.min(dfs2(
+            seen,
+            grid,
+            turn_coords.0,
+            turn_coords.1,
+            turn_dir,
+            curr_score + 1001,
+            best_score,
+            best_so_far,
+            best_tiles,
+        ));
+    }
+
+    if min == best_score {
+        best_tiles.insert((row, col));
+    }
+
+    min
+}
+
+fn part1() {
     let input = include_str!("input.txt");
     let mut grid: Vec<Vec<char>> = vec![];
     let mut start_idx = (0, 0);
@@ -118,22 +195,59 @@ fn part1() {
         grid.push(grid_line);
     }
 
-    println!(
-        "(Part 1) Shortest path to end: {}",
-        dfs(
-            &mut HashMap::new(),
-            &grid,
-            start_idx.0,
-            start_idx.1,
-            Direction::East,
-            0
-        )
+    let mut best_so_far = u64::MAX;
+    let best_score = dfs(
+        &mut HashMap::new(),
+        &grid,
+        start_idx.0,
+        start_idx.1,
+        Direction::East,
+        0,
+        &mut best_so_far,
     );
+
+    println!("(Part 1) Shortest path to end: {}", best_score);
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    println!("(Part 2) Part 2 not implemented yet");
+    let input = include_str!("input.txt");
+    let mut grid: Vec<Vec<char>> = vec![];
+    let mut start_idx = (0, 0);
+    for (row, line) in input.lines().enumerate() {
+        let mut grid_line = vec![];
+        for (col, ch) in line.chars().enumerate() {
+            if ch == 'S' {
+                start_idx = (row, col);
+            }
+            grid_line.push(ch);
+        }
+        grid.push(grid_line);
+    }
+
+    let mut best_so_far = u64::MAX;
+    let best_score = dfs(
+        &mut HashMap::new(),
+        &grid,
+        start_idx.0,
+        start_idx.1,
+        Direction::East,
+        0,
+        &mut best_so_far,
+    );
+
+    let mut best_tiles = HashSet::new();
+    dfs2(
+        &mut HashMap::new(),
+        &grid,
+        start_idx.0,
+        start_idx.1,
+        Direction::East,
+        0,
+        best_score,
+        &mut best_so_far,
+        &mut best_tiles,
+    );
+    println!("(Part 2) Number of best path tiles: {}", best_tiles.len());
 }
 
 pub fn day16() {

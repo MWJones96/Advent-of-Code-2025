@@ -1,0 +1,12 @@
+---- DAY 16 ----
+(Part 1) Shortest path to end: 94444
+(Part 2) Best path tile count: 37
+
+---- DAY 16 ----
+(Part 1) Shortest path to end: 94444
+(Part 2) Best path tile count: 37
+
+---- DAY 16 ----
+(Part 1) Shortest path to end: 94444
+(Part 2) Best path tile count: 37
+
