@@ -1,3 +1,4 @@
+use core::time;
 use std::collections::HashMap;
 
 fn dfs(
@@ -71,8 +72,34 @@ fn part1() {
 }
 
 fn part2() {
-    let _input = include_str!("input.txt");
-    println!("(2024 Day 20) Part 2 not implemented yet");
+    let input = include_str!("input.txt");
+    let grid: Vec<&str> = input.split("\n").collect();
+    let mut skips: u64 = 0;
+    let mut seen: HashMap<(usize, usize), usize> = HashMap::new();
+    for (row_i, row) in grid.iter().enumerate() {
+        for (col_i, col) in row.chars().enumerate() {
+            if col == 'E' {
+                dfs(&grid, &mut seen, row_i, col_i, 0);
+                break;
+            }
+        }
+    }
+    for k1 in seen.keys() {
+        for k2 in seen.keys() {
+            let row_diff = k1.0.abs_diff(k2.0);
+            let col_diff = k1.1.abs_diff(k2.1);
+            let diff = row_diff + col_diff;
+            if diff <= 20 {
+                let dist_to_end = *seen.get(k1).unwrap();
+                let skip_dist = diff + *seen.get(k2).unwrap();
+                let timesave = dist_to_end as i64 - skip_dist as i64;
+                if timesave >= 100 {
+                    skips += 1;
+                }
+            }
+        }
+    }
+    println!("(Part 2) Cheats saving >= 100ps: {}", skips);
 }
 
 pub fn day20() {
